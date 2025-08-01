@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image } from 'react-native';
+import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { saveToken, validateToken } from '../../utils/token';
-import harfordLogo from '../../assets/images/harford-logo.png';  // Make sure path is correct
+
+// Load API_URL from expo constants extra
+const apiUrl = Constants.expoConfig?.extra?.API_URL || 'http://localhost:3000';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -11,7 +14,6 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const apiUrl = 'http://192.168.1.219:3000'; // Or get from .env
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
@@ -30,20 +32,22 @@ export default function LoginScreen() {
       const isValid = await validateToken();
 
       if (isValid) {
-        router.replace('/dashboard');
+        router.replace('/dashboard'); // Redirect if valid
       } else {
-        alert('Invalid token');
+        Alert.alert('Invalid token');
       }
     } catch (error: any) {
-      alert('Error: ' + error.message);
+      Alert.alert('Error', error.message);
     }
   };
 
   return (
     <View style={styles.container}>
+      {/* Logo */}
       <Image
-        source={harfordLogo}
+        source={require('../../assets/images/harford-logo.png')}
         style={styles.logo}
+        resizeMode="contain"
       />
 
       <Text style={styles.title}>Login</Text>
@@ -75,25 +79,24 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 120,
+    paddingTop: 100,
     paddingHorizontal: 24,
     backgroundColor: '#ddd',
+    alignItems: 'center',
   },
   logo: {
     width: 200,
     height: 100,
-    resizeMode: 'contain',
     marginBottom: 20,
-    alignSelf: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 24,
-    alignSelf: 'center',
     color: '#000',
   },
   input: {
+    width: '100%',
     height: 48,
     borderWidth: 1,
     borderColor: '#ccc',
