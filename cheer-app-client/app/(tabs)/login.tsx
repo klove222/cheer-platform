@@ -1,22 +1,17 @@
 import React, { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { saveToken, validateToken } from '../../utils/token';
+import harfordLogo from '../../assets/images/harford-logo.png';  // Make sure path is correct
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async () => {
-    setLoading(true);
     try {
-      // Use the real API URL from .env
-      const apiUrl =
-        process.env.EXPO_PUBLIC_API_URL ||
-        'http://localhost:3000';
-
+      const apiUrl = 'http://192.168.1.219:3000'; // Or get from .env
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
@@ -31,24 +26,26 @@ export default function LoginScreen() {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Save and validate token
       await saveToken(data.token);
       const isValid = await validateToken();
 
       if (isValid) {
         router.replace('/dashboard');
       } else {
-        Alert.alert('Invalid token', 'The login was not successful.');
+        alert('Invalid token');
       }
     } catch (error: any) {
-      Alert.alert('Login failed', error.message || 'Could not log in.');
-    } finally {
-      setLoading(false);
+      alert('Error: ' + error.message);
     }
   };
 
   return (
     <View style={styles.container}>
+      <Image
+        source={harfordLogo}
+        style={styles.logo}
+      />
+
       <Text style={styles.title}>Login</Text>
 
       <TextInput
@@ -70,7 +67,7 @@ export default function LoginScreen() {
         style={[styles.input, { color: '#000' }]}
       />
 
-      <Button title={loading ? "Logging in..." : "Login"} onPress={handleLogin} disabled={loading} />
+      <Button title="LOGIN" onPress={handleLogin} />
     </View>
   );
 }
@@ -80,7 +77,14 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 120,
     paddingHorizontal: 24,
-    backgroundColor: '#fff',
+    backgroundColor: '#ddd',
+  },
+  logo: {
+    width: 200,
+    height: 100,
+    resizeMode: 'contain',
+    marginBottom: 20,
+    alignSelf: 'center',
   },
   title: {
     fontSize: 28,
